@@ -1,0 +1,30 @@
+run_analysis <- function() {
+  test <- read.table("X_test.txt")
+  train <- read.table("X_train.txt")
+  ytest <- read.table("y_test.txt")
+  ytrain <- read.table("y_train.txt")
+  subtest <- read.table("subject_test.txt")
+  subtrain <- read.table("subject_train.txt")
+  train <- cbind(train, cbind(subtrain, ytrain))
+  test <- cbind(test, cbind(subtest, ytest))
+  bigdataframe <- rbind(train,test)
+  chosen <- c(1:6,41:46, 81:86, 121:126, 161:166, 201, 202)
+  chosen <- c(chosen, 214, 215, 227, 228, 240, 241, 253, 254)
+  chosen <- c(chosen, 266:271, 294:296, 345:350, 373:375)
+  chosen <- c(chosen, 424:429, 452:454, 503, 504, 513, 516, 517)
+  chosen <- c(chosen, 526, 529, 530, 539, 542, 543, 552, 562, 563)
+  dataframe <- bigdataframe[ ,chosen]
+  colheads <- read.table("features.txt")
+  colheads <- rbind(colheads, rbind(c(562,"subject"), c(563,"activity")))
+  colheads <- colheads[chosen, ]  
+  colnames(dataframe) <- colheads[ ,2]
+  actlabels <- read.table("activity_labels.txt")
+  dataframe <- merge(dataframe, actlabels, by.x="activity", by.y="V1", all=T, sort=F)
+  names(dataframe)<- gsub("-", "", names(dataframe))
+  names(dataframe)<- gsub("\\(", "", names(dataframe))
+  names(dataframe)<- gsub("\\)", "", names(dataframe))
+  head(dataframe)
+  temp <- dataframe %>% group_by(subject, activity)
+  answer <<- temp %>% summarise_each(funs(mean))
+  write.table(answer, "tableofmeans.txt", row.names=F)
+}
